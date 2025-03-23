@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Your Shopping Cart</h1>
+
+{% if cart %}
+<div class="table-responsive">
+
+{% for item in cart %}
+
+{% endfor %}
+<table class="table table-striped">
+<thead>
+<tr>
+<th>Product</th>
+<th>Custom Text</th>
+<th>Price</th>
+<th>Quantity</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>{{ item.name }}</td>
+<td>{{ item.custom_text or 'N/A' }}</td>
+<td>${{ item.price }}</td>
+<td>{{ item.quantity }}</td>
+<td>${{ "%.2f"|format(item.total) }}</td>
+</tr></tbody>
+<tfoot>
+<tr>
+<td colspan="4" class="text-end fw-bold">Grand Total:</td>
+<td class="fw-bold">${{ "%.2f"|format(total) }}</td>
+</tr>
+</tfoot>
+</table>
+</div>
+
+<div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+<a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+<i class="bi bi-arrow-left"></i> Continue Shopping
+</a>
+<a href="#" class="btn btn-success">
+<i class="bi bi-credit-card"></i> Proceed to Checkout
+</a>
+</div>
+{% else %}
+<div class="alert alert-info">
+<i class="bi bi-info-circle"></i> Your cart is empty.
+</div>
+
+<a href="{{ url_for('home') }}" class="btn btn-primary">
+<i class="bi bi-shop"></i> Go Shopping
+</a>
+{% endif %}
+{% endblock %}
