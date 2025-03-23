@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import json
 from datetime import datetime
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # In production, use a secure random key
@@ -102,6 +103,55 @@ def cart():
    cart = session.get('cart', [])
    total = sum(item['total'] for item in cart)
    return render_template('cart.html', cart=cart, total=total)
+
+# CHECKOUT ROUTES - Fixed to remove duplicates
+@app.route('/checkout')
+def checkout():
+    cart = session.get('cart', [])
+    if not cart:
+        return redirect(url_for('home'))
+    
+    total = sum(item['total'] for item in cart)
+    return render_template('checkout.html', cart=cart, total=total)
+
+# Choose ONE of these order processing routes based on which templates you created:
+
+# Option 1: Using order_confirmation.html template
+@app.route('/place_order', methods=['POST'])
+def place_order():
+    cart = session.get('cart', [])
+    if not cart:
+        return redirect(url_for('home'))
+
+    # Collect order information
+    order = {
+        'order_id': str(uuid.uuid4())[:8].upper(),  # Generate a short order ID
+        'name': request.form.get('name'),
+        'email': request.form.get('email'),
+        'address': request.form.get('address'),
+        'payment': request.form.get('payment'),
+        'items': cart,
+        'total': sum(item['total'] for item in cart),
+        'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+    # Clear the cart
+    session['cart'] = []
+
+    return render_template('order_confirmation.html', order=order)
+
+# Option 2: Using thank_you.html template (simpler)
+@app.route('/complete_order', methods=['POST'])
+def complete_order():
+    # Get customer information
+    name = request.form.get('name')
+    email = request.form.get('email')
+    
+    # Clear the cart
+    session['cart'] = []
+    
+    # Show thank you page
+    return render_template('thank_you.html', name=name, email=email)
 
 if __name__ == '__main__':
    app.run(debug=True, host='0.0.0.0')
